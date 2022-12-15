@@ -13,14 +13,14 @@ jobs:
     parameters:
       os:
         type: executor
-      node-version:
+      matrix-var:
         type: string
     executor: linux
     steps:
       - checkout
       - run:
           shell: bash
-          command: echo "matrix vaule :" << parameters.matrix-var >>
+          command: echo "matrix vaule : << parameters.matrix-var >>"
           name: step1
 
 workflows:
