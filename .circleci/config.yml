@@ -9,6 +9,15 @@ executors:
       image: ubuntu-2004:202107-02
 
 jobs:
+  job1:
+    executor:
+      name: linux
+    steps:
+        - run:
+            shell: bash
+            command: echo $MY_ENV_VAR
+            name: step1
+            
   test:
     parameters:
       matrix-var:
@@ -25,6 +34,7 @@ jobs:
 workflows:
   all-tests:
     jobs:
+      - job1
       - test:
           matrix:
             parameters:
