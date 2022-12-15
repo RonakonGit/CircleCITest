@@ -53,6 +53,7 @@ jobs:
 workflows:
   all-tests:
     jobs:
+      - build
       - job1 :
           context: smaple-contex
       - test:
