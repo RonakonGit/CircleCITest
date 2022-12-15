@@ -13,10 +13,11 @@ jobs:
     executor:
       name: linux
     steps:
-        - run:
-            shell: bash
-            command: echo $MY_ENV_VAR
-            name: step1
+      - checkout
+      - run:
+          name: "echo an env var that is part of our context"
+          command: |
+            echo $MY_ENV_VAR
             
   test:
     parameters:
@@ -34,7 +35,8 @@ jobs:
 workflows:
   all-tests:
     jobs:
-      - job1
+      - job1 :
+          context: smaple-contex
       - test:
           matrix:
             parameters:
