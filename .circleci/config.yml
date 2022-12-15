@@ -9,7 +9,7 @@ executors:
 
 jobs:
  
-  build:
+  job1:
       docker:
         # Primary Executor
         - image: openjdk:17.0
@@ -24,7 +24,7 @@ jobs:
         - checkout
         - run: echo "this is the build job"
   
-  job1:
+  job2:
     docker:
       - image: cimg/base:2020.01
     steps:
@@ -35,7 +35,7 @@ jobs:
             echo $MY_ENV_VAR
             echo ${MY_ENV_VAR}
             
-  test:
+  job3:
     parameters:
       matrix-var:
         type: string     
@@ -51,10 +51,14 @@ jobs:
 workflows:
   all-tests:
     jobs:
-      - build
-      - job1 :
+      - job1
+      - job2 :
           context: smaple-contex
-      - test:
+          requires:
+            - job1
+      - job3:
+          requires:
+            - job2
           matrix:
             parameters:
               matrix-var: ["python", "java"]
