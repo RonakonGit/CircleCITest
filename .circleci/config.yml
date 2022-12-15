@@ -15,7 +15,7 @@ jobs:
         type: executor
       matrix-var:
         type: string
-    executor: linux
+    executor: "linux"
     steps:
       - checkout
       - run:
