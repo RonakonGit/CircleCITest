@@ -20,7 +20,7 @@ jobs:
       - checkout
       - run:
           shell: bash
-          command: echo "matrix vaule : << parameters.matrix-var >>"
+          command: echo "matrix vaule << parameters.matrix-var >> "
           name: step1
 
 workflows:
