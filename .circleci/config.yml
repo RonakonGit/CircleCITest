@@ -11,11 +11,10 @@ executors:
 jobs:
   test:
     parameters:
-      os:
-        type: executor
       matrix-var:
-        type: string
-    executor: "linux"
+        type: string     
+    executor:
+      name: linux
     steps:
       - checkout
       - run:
