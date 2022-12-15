@@ -18,9 +18,6 @@ jobs:
     executor: linux
     steps:
       - checkout
-      - node/install:
-          node-version: << parameters.node-version >>
-          install-yarn: true
       - run:
           shell: bash
           command: echo "matrix vaule :" << parameters.matrix-var >>
