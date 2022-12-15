@@ -1,7 +1,6 @@
 version: 2.1
 
-orbs:
-  node: circleci/node@4.7
+
 
 executors:
   linux: # a Linux VM running Ubuntu 20.04
@@ -9,6 +8,25 @@ executors:
       image: ubuntu-2004:202107-02
 
 jobs:
+ 
+  build:
+      docker:
+        # Primary Executor
+        - image: openjdk:17.0
+          auth:
+            username: mydockerhub-user
+            password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+
+        # Dependency Service(s)
+        - image: postgres:10.8
+          auth:
+            username: mydockerhub-user
+            password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+          environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: postgres
+
   job1:
     executor:
       name: linux
