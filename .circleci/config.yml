@@ -1,26 +1,77 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+commands:
+  shared_steps:
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+      # Restore Cached Dependencies
+      - restore_cache:
+          name: Restore bundle cache
+          key: administrate-{{ checksum "Gemfile.lock" }}
+
+      # Bundle install dependencies
+      - run: bundle install --path vendor/bundle
+
+      # Cache Dependencies
+      - save_cache:
+          name: Store bundle cache
+          key: administrate-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+      # Wait for DB
+      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
+
+      # Setup the environment
+      - run: cp .sample.env .env
+
+      # Setup the database
+      - run: bundle exec rake db:setup
+
+      # Run the tests
+      - run: bundle exec rake
+
+default_job: &default_job
+  working_directory: ~/administrate
+  steps:
+    - shared_steps
+    # Run the tests against multiple versions of Rails
+    - run: bundle exec appraisal install
+    - run: bundle exec appraisal rake
+
+jobs:
+  ruby-25:
+    <<: *default_job
+    docker:
+      - image: circleci/ruby:2.5.0-node-browsers
+        environment:
+          PGHOST: localhost
+          PGUSER: administrate
+          RAILS_ENV: test
+      - image: postgres:10.1-alpine
+        environment:
+          POSTGRES_USER: administrate
+          POSTGRES_DB: ruby25
+          POSTGRES_PASSWORD: ""
+
+  ruby-26:
+    <<: *default_job
+    docker:
+      - image: circleci/ruby:2.6.3-node-browsers-legacy
+        environment:
+          PGHOST: localhost
+          PGUSER: administrate
+          RAILS_ENV: test
+      - image: postgres:10.1-alpine
+        environment:
+          POSTGRES_USER: administrate
+          POSTGRES_DB: ruby26
+          POSTGRES_PASSWORD: ""
+
 workflows:
-  say-hello-workflow:
+  version: 2
+  multiple-rubies:
     jobs:
-      - say-hello
+      - ruby-26
+      - ruby-25
